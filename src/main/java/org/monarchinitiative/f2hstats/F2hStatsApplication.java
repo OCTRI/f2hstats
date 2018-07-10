@@ -29,7 +29,8 @@ public class F2hStatsApplication implements CommandLineRunner {
 	
 	private static final String SANDBOX_R3 = "R3";
 	private static final String SANDBOX_R2 = "R2";
-	private static final String SANDBOX_HAPI = "HAPI";
+	private static final String SANDBOX_HAPI3 = "HAPI3";
+	private static final String SANDBOX_HAPI2 = "HAPI2";
 	private static final String SANDBOX_EPIC = "EPIC";
 	private static final String SANDBOX_MITRE = "MITRE";
 
@@ -74,7 +75,7 @@ public class F2hStatsApplication implements CommandLineRunner {
 	}
 
 	private static List<String> getSandboxOptions() {
-		return Arrays.asList(SANDBOX_R3, SANDBOX_R2, SANDBOX_HAPI, SANDBOX_EPIC, SANDBOX_MITRE);
+		return Arrays.asList(SANDBOX_R3, SANDBOX_R2, SANDBOX_HAPI3, SANDBOX_HAPI2, SANDBOX_EPIC, SANDBOX_MITRE);
 	}
 
 	private void runSandbox(int maxPages, String sandbox) throws FHIRException {
@@ -85,10 +86,20 @@ public class F2hStatsApplication implements CommandLineRunner {
 				run = createStatsRun(stu3Service);
 				stu3Service.allPatientApiRun(maxPages, run);
 				break;
-			case SANDBOX_HAPI:
+			case SANDBOX_HAPI3:
 				stu3Service.setUrl("http://hapi.fhir.org/baseDstu3");
 				run = createStatsRun(stu3Service);
 				stu3Service.patientsByBirthdayApiRun(maxPages, run);
+				break;
+			case SANDBOX_HAPI2:
+				/* This sandbox had incorrect gender formats for several patients. The bundle can't be 
+				 * parsed when this happens, and we can't determine the next set of patients to load.
+				 * I deleted some of the patients, so we could get a little farther along, but gave up 
+				 * after awhile. Patients deleted: 821, 9914, 6541, pid-17344
+				 * curl -X "DELETE" http://hapi.fhir.org/baseDstu2/Patient/pid-17344 */
+				stu2Service.setUrl("http://hapi.fhir.org/baseDstu2");
+				run = createStatsRun(stu2Service);
+				stu2Service.allPatientApiRun(maxPages, run);
 				break;
 			case SANDBOX_EPIC:
 				stu2Service.setUrl("https://open-ic.epic.com/FHIR/api/FHIR/DSTU2");
