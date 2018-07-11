@@ -27,7 +27,7 @@ FROM `observation_loinc` ol
 	join stats_run_observation sro on sro.id = ol.observation
 	join stats_run_patient srp on srp.id = sro.patient
 	join stats_run sr on srp.`stats_run` = sr.id
-group by ol.loinc
+group by ol.loinc, l.code
 order by count(distinct ol.id) desc, code;
 
 /* Summary of Successes by Method */
@@ -44,7 +44,7 @@ count(r.id) as 'Count', m.description as 'Method' from method_result r
 	inner join stats_run_observation o on r.observation = o.id
 	inner join stats_run_patient p on p.id = o.patient
 	inner join stats_run sr on p.`stats_run` = sr.id
-where hpo_term_id is not null group by method_type;
+where hpo_term_id is not null group by r.method_type, m.description;
 
 /* Conversion Failures by Exception Type */
 select group_concat(distinct CASE 
@@ -59,7 +59,7 @@ count(o.id) as 'Count', e.`description` as 'Exception' from stats_run_observatio
 	join exception_type e on o.exception_type = e.id
 	inner join stats_run_patient p on p.id = o.patient
 	inner join stats_run sr on p.`stats_run` = sr.id
-group by o.exception_type;
+group by o.exception_type, e.description;
 
 /* Method Failures by Exception Type */
 select group_concat(distinct CASE 
@@ -75,7 +75,7 @@ count(r.id) as 'Count', e.`description` as 'Exception' from method_result r
 	inner join stats_run_observation o on r.observation = o.id
 	inner join stats_run_patient p on p.id = o.patient
 	inner join stats_run sr on p.`stats_run` = sr.id
-group by r.exception_type;
+group by r.exception_type, e.description;
 
 /* % Success */
 select CASE 
