@@ -1,99 +1,61 @@
 /* Successes by HPO Term/Negation */
-select group_concat(distinct CASE 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu3' THEN 'HAPI3' 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu2' THEN 'HAPI2' 
-	WHEN sr.`server_base`='https://syntheticmass.mitre.org/fhir' THEN 'MITRE' 
-	WHEN sr.`server_base`='https://r3.smarthealthit.org' THEN 'R3' 
-	WHEN sr.`server_base`='https://r2.smarthealthit.org' THEN 'R2' 
-	WHEN sr.`server_base`='https://open-ic.epic.com/FHIR/api/FHIR/DSTU2' THEN 'EPIC' 
-	ELSE sr.server_base END) as 'Servers', 
-count(mr.id) as 'Count', group_concat(distinct mr.hpo_term_id) as 'Term Id', mr.hpo_term_name as 'Term Name', mr.negated as 'Negated' from method_result mr
-	inner join stats_run_observation o on mr.observation = o.id
-	inner join stats_run_patient p on p.id = o.patient
-	inner join stats_run sr on p.`stats_run` = sr.id
-where mr.hpo_term_id is not null group by mr.hpo_term_name, mr.negated order by count(mr.id) DESC;
+SELECT group_concat(DISTINCT sr.server) AS 'Servers', count(mr.id) AS 'Count', 
+	group_concat(DISTINCT mr.hpo_term_id) AS 'Term Id', mr.hpo_term_name AS 'Term Name', 
+	mr.negated AS 'Negated'
+FROM method_result mr
+	INNER JOIN stats_run_observation o ON mr.observation = o.id
+	INNER JOIN stats_run_patient p ON p.id = o.patient
+	INNER JOIN stats_run sr ON p.`stats_run` = sr.id
+WHERE mr.hpo_term_id IS NOT NULL
+GROUP BY mr.hpo_term_name, mr.negated 
+ORDER BY count(mr.id) DESC;
 
 /* Summary of Loinc Ids encountered */
-select l.code as 'Code', count(distinct ol.id) as 'Count', group_concat(distinct ol.direct separator ';') as 'Direct', group_concat(distinct CASE 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu3' THEN 'HAPI3' 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu2' THEN 'HAPI2' 
-	WHEN sr.`server_base`='https://syntheticmass.mitre.org/fhir' THEN 'MITRE' 
-	WHEN sr.`server_base`='https://r3.smarthealthit.org' THEN 'R3' 
-	WHEN sr.`server_base`='https://r2.smarthealthit.org' THEN 'R2' 
-	WHEN sr.`server_base`='https://open-ic.epic.com/FHIR/api/FHIR/DSTU2' THEN 'EPIC' 
-	ELSE sr.server_base END) as 'Servers' 
+SELECT l.code AS 'Code', count(DISTINCT ol.id) AS 'Count', group_concat(DISTINCT ol.direct separator ';') AS 'Direct', 
+ group_concat(DISTINCT sr.server) AS 'Servers' 
 FROM `observation_loinc` ol
-	join loinc l on l.id = ol.`loinc`
-	join stats_run_observation sro on sro.id = ol.observation
-	join stats_run_patient srp on srp.id = sro.patient
-	join stats_run sr on srp.`stats_run` = sr.id
-group by ol.loinc, l.code
-order by count(distinct ol.id) desc, code;
+	INNER JOIN loinc l ON l.id = ol.`loinc`
+	INNER JOIN stats_run_observation sro ON sro.id = ol.observation
+	INNER JOIN stats_run_patient srp ON srp.id = sro.patient
+	INNER JOIN stats_run sr ON srp.`stats_run` = sr.id
+GROUP BY ol.loinc, l.code
+ORDER BY count(DISTINCT ol.id) DESC, code;
 
 /* Summary of Successes by Method */
-select group_concat(distinct CASE 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu3' THEN 'HAPI3' 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu2' THEN 'HAPI2' 
-	WHEN sr.`server_base`='https://syntheticmass.mitre.org/fhir' THEN 'MITRE' 
-	WHEN sr.`server_base`='https://r3.smarthealthit.org' THEN 'R3' 
-	WHEN sr.`server_base`='https://r2.smarthealthit.org' THEN 'R2' 
-	WHEN sr.`server_base`='https://open-ic.epic.com/FHIR/api/FHIR/DSTU2' THEN 'EPIC' 
-	ELSE sr.server_base END) as 'Servers', 
-count(r.id) as 'Count', m.description as 'Method' from method_result r
-	inner join method_type m on r.`method_type` = m.id
-	inner join stats_run_observation o on r.observation = o.id
-	inner join stats_run_patient p on p.id = o.patient
-	inner join stats_run sr on p.`stats_run` = sr.id
-where hpo_term_id is not null group by r.method_type, m.description;
+SELECT group_concat(DISTINCT sr.server) AS 'Servers', count(r.id) AS 'Count', m.description AS 'Method' 
+FROM method_result r
+	INNER JOIN method_type m ON r.`method_type` = m.id
+	INNER JOIN stats_run_observation o ON r.observation = o.id
+	INNER JOIN stats_run_patient p ON p.id = o.patient
+	INNER JOIN stats_run sr ON p.`stats_run` = sr.id
+WHERE hpo_term_id IS NOT NULL
+GROUP BY r.method_type, m.description;
 
 /* Conversion Failures by Exception Type */
-select group_concat(distinct CASE 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu3' THEN 'HAPI3' 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu2' THEN 'HAPI2' 
-	WHEN sr.`server_base`='https://syntheticmass.mitre.org/fhir' THEN 'MITRE' 
-	WHEN sr.`server_base`='https://r3.smarthealthit.org' THEN 'R3' 
-	WHEN sr.`server_base`='https://r2.smarthealthit.org' THEN 'R2' 
-	WHEN sr.`server_base`='https://open-ic.epic.com/FHIR/api/FHIR/DSTU2' THEN 'EPIC' 
-	ELSE sr.server_base END) as 'Servers', 
-count(o.id) as 'Count', e.`description` as 'Exception' from stats_run_observation o
-	join exception_type e on o.exception_type = e.id
-	inner join stats_run_patient p on p.id = o.patient
-	inner join stats_run sr on p.`stats_run` = sr.id
-group by o.exception_type, e.description;
+SELECT group_concat(DISTINCT sr.server) AS 'Servers', count(o.id) AS 'Count', e.`description` AS 'Exception' 
+FROM stats_run_observation o
+	INNER JOIN exception_type e ON o.exception_type = e.id
+	INNER JOIN stats_run_patient p ON p.id = o.patient
+	INNER JOIN stats_run sr ON p.`stats_run` = sr.id
+GROUP BY o.exception_type, e.description;
 
 /* Method Failures by Exception Type */
-select group_concat(distinct CASE 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu3' THEN 'HAPI3' 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu2' THEN 'HAPI2' 
-	WHEN sr.`server_base`='https://syntheticmass.mitre.org/fhir' THEN 'MITRE' 
-	WHEN sr.`server_base`='https://r3.smarthealthit.org' THEN 'R3' 
-	WHEN sr.`server_base`='https://r2.smarthealthit.org' THEN 'R2' 
-	WHEN sr.`server_base`='https://open-ic.epic.com/FHIR/api/FHIR/DSTU2' THEN 'EPIC' 
-	ELSE sr.server_base END) as 'Servers', 
-count(r.id) as 'Count', e.`description` as 'Exception' from method_result r
-	join exception_type e on r.exception_type = e.id
-	inner join stats_run_observation o on r.observation = o.id
-	inner join stats_run_patient p on p.id = o.patient
-	inner join stats_run sr on p.`stats_run` = sr.id
-group by r.exception_type, e.description;
+SELECT group_concat(DISTINCT sr.server) AS 'Servers', count(r.id) AS 'Count', e.`description` AS 'Exception' 
+FROM method_result r
+	INNER JOIN exception_type e ON r.exception_type = e.id
+	INNER JOIN stats_run_observation o ON r.observation = o.id
+	INNER JOIN stats_run_patient p ON p.id = o.patient
+	INNER JOIN stats_run sr ON p.`stats_run` = sr.id
+GROUP BY r.exception_type, e.description;
 
 /* % Success */
-select CASE 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu3' THEN 'HAPI3' 
-	WHEN sr.`server_base`='http://hapi.fhir.org/baseDstu2' THEN 'HAPI2' 
-	WHEN sr.`server_base`='https://syntheticmass.mitre.org/fhir' THEN 'MITRE' 
-	WHEN sr.`server_base`='https://r3.smarthealthit.org' THEN 'R3' 
-	WHEN sr.`server_base`='https://r2.smarthealthit.org' THEN 'R2' 
-	WHEN sr.`server_base`='https://open-ic.epic.com/FHIR/api/FHIR/DSTU2' THEN 'EPIC' 
-	ELSE sr.server_base END as 'Servers', 
-count(o.id) as 'Total Observations', count(sub1.annotated) as 'Num Annotated',
-count(sub2.successful) as 'Num Successful',
-count(sub1.annotated)/count(o.id) * 100 as '% Annotated',
-count(sub2.successful)/count(sub1.annotated) * 100 as '% Success of Annotated'
- from `stats_run_observation` o
-	left join (select distinct ao.id as 'annotated' from stats_run_observation ao inner join method_result r on ao.id = r.`observation`) as sub1 on sub1.annotated = o.id 
-	left join (select distinct ao.id as 'successful' from stats_run_observation ao inner join method_result r on ao.id = r.`observation` where r.hpo_term_id is not null) as sub2 on sub2.successful = o.id 
-	inner join stats_run_patient p on p.id = o.patient
-	inner join stats_run sr on p.`stats_run` = sr.id
-group by sr.id;
+SELECT sr.server AS 'Server', count(o.id) AS 'Total Observations', count(sub1.annotated) AS 'Num Annotated',
+	count(sub2.successful) AS 'Num Successful', count(sub1.annotated)/count(o.id) * 100 AS '% Annotated',
+	count(sub2.successful)/count(sub1.annotated) * 100 AS '% Success of Annotated'
+FROM `stats_run_observation` o
+	LEFT JOIN (SELECT DISTINCT ao.id as 'annotated' FROM stats_run_observation ao INNER JOIN method_result r ON ao.id = r.`observation`) AS sub1 ON sub1.annotated = o.id 
+	LEFT JOIN (SELECT DISTINCT ao.id as 'successful' FROM stats_run_observation ao INNER JOIN method_result r ON ao.id = r.`observation` WHERE r.hpo_term_id is not null) AS sub2 ON sub2.successful = o.id 
+	INNER JOIN stats_run_patient p ON p.id = o.patient
+	INNER JOIN stats_run sr ON p.`stats_run` = sr.id
+GROUP BY sr.id;
 
