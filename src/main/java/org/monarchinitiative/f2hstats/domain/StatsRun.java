@@ -26,14 +26,6 @@ public class StatsRun extends AbstractEntity {
 	@NotNull
 	Date runDate;
 
-	public String getServer() {
-		return server;
-	}
-
-	public void setServer(String server) {
-		this.server = server;
-	}
-
 	public StatsRun() {
 
 	}
@@ -43,6 +35,14 @@ public class StatsRun extends AbstractEntity {
 		this.serverBase = serverBase;
 		this.fhirVersion = fhirVersion;
 		this.runDate = runDate;
+	}
+
+	public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
 	}
 
 	public String getServerBase() {
