@@ -83,12 +83,12 @@ public class F2hStatsApplication implements CommandLineRunner {
 		switch (sandbox) {
 			case SANDBOX_MITRE:
 				stu3Service.setUrl("https://syntheticmass.mitre.org/fhir");
-				run = createStatsRun(stu3Service);
+				run = createStatsRun(sandbox, stu3Service);
 				stu3Service.allPatientApiRun(maxPages, run);
 				break;
 			case SANDBOX_HAPI3:
 				stu3Service.setUrl("http://hapi.fhir.org/baseDstu3");
-				run = createStatsRun(stu3Service);
+				run = createStatsRun(sandbox, stu3Service);
 				stu3Service.patientsByBirthdayApiRun(maxPages, run);
 				break;
 			case SANDBOX_HAPI2:
@@ -98,12 +98,12 @@ public class F2hStatsApplication implements CommandLineRunner {
 				 * after awhile. Patients deleted: 821, 9914, 6541, pid-17344
 				 * curl -X "DELETE" http://hapi.fhir.org/baseDstu2/Patient/pid-17344 */
 				stu2Service.setUrl("http://hapi.fhir.org/baseDstu2");
-				run = createStatsRun(stu2Service);
+				run = createStatsRun(sandbox, stu2Service);
 				stu2Service.allPatientApiRun(maxPages, run);
 				break;
 			case SANDBOX_EPIC:
 				stu2Service.setUrl("https://open-ic.epic.com/FHIR/api/FHIR/DSTU2");
-				run = createStatsRun(stu2Service);
+				run = createStatsRun(sandbox, stu2Service);
 				stu2Service.patientsByNameApiRun(maxPages, run, Arrays.asList(
 						"Argonaut,Jason", "Argonaut,Jessica", "Ragsdale,Flapjacks",
 						"Ragsdale,Pancakes", "Ragsdale,Waffles","Ragsdale,Bacon",
@@ -111,12 +111,12 @@ public class F2hStatsApplication implements CommandLineRunner {
 				break;
 			case SANDBOX_R2:
 				stu2Service.setUrl("https://r2.smarthealthit.org");
-				run = createStatsRun(stu2Service);
+				run = createStatsRun(sandbox, stu2Service);
 				stu2Service.allPatientApiRun(maxPages, run);
 				break;
 			case SANDBOX_R3:
 				stu3Service.setUrl("https://r3.smarthealthit.org");
-				run = createStatsRun(stu3Service);
+				run = createStatsRun(sandbox, stu3Service);
 				stu3Service.allPatientApiRun(maxPages, run);
 				break;
 			default:
@@ -124,8 +124,8 @@ public class F2hStatsApplication implements CommandLineRunner {
 		}
 	}
 
-	private StatsRun createStatsRun(FhirService service) {
-		StatsRun run = new StatsRun(service.getUrl(), service.getVersion(), new Date());
+	private StatsRun createStatsRun(String server, FhirService service) {
+		StatsRun run = new StatsRun(server, service.getUrl(), service.getVersion(), new Date());
 		return statsRunRepository.save(run);
 	}
 
