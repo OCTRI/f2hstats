@@ -7,6 +7,7 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import org.monarchinitiative.f2hstats.domain.list.ExceptionType;
+import org.monarchinitiative.f2hstats.domain.list.Loinc;
 
 /**
  * An observation associated with a patient and run. The json fields records
@@ -32,6 +33,9 @@ public class StatsRunObservation extends AbstractEntity {
 
 	@ManyToOne
 	ExceptionType exceptionType;
+
+	@ManyToOne
+	Loinc loinc;
 
 	public StatsRunPatient getPatient() {
 		return patient;
@@ -63,6 +67,19 @@ public class StatsRunObservation extends AbstractEntity {
 
 	public void setExceptionType(ExceptionType exceptionType) {
 		this.exceptionType = exceptionType;
+	}
+
+	/**
+	 * While an observation may have many Loincs, this represents the single Loinc for which the conversion
+	 * is being attempted.
+	 * @return the Loinc relevant to the conversion or null if the observation has no Loinc
+	 */
+	public Loinc getLoinc() {
+		return loinc;
+	}
+
+	public void setLoinc(Loinc loinc) {
+		this.loinc = loinc;
 	}
 
 }
