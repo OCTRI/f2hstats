@@ -28,7 +28,9 @@ import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.MethodConversionResult;
 import org.monarchinitiative.fhir2hpo.loinc.LoincId;
 import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
+import org.monarchinitiative.fhir2hpo.service.HpoService;
 import org.monarchinitiative.fhir2hpo.service.ObservationAnalysisService;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,6 +70,9 @@ public abstract class FhirService {
 	@Autowired
 	protected ObservationAnalysisService observationAnalysisService;
 	
+	@Autowired
+	private HpoService hpoService;
+	
 	private FhirContext stu3Ctx = FhirContext.forDstu3();
 	
 	private String url;
@@ -94,7 +99,7 @@ public abstract class FhirService {
 		return getFhirContext().getVersion().getVersion().name();
 	}	
 
-	// The parser will always be version 3 since the persisted json will always be a STU33 object
+	// The parser will always be version 3 since the persisted json will always be a STU3 object
 	public IParser getParser() {
 		return stu3Ctx.newJsonParser();
 	}
@@ -190,8 +195,9 @@ public abstract class FhirService {
 		methodResult.setObservation(runObservation);
 		methodResult.setMethodType(getOrCreateMethodType(methodConversionResult.getMethod()));
 		if (methodConversionResult.hasTerm()) {
-			methodResult.setHpoTermId(methodConversionResult.getTerm().getHpoTerm().getId().getId());
-			methodResult.setHpoTermName(methodConversionResult.getTerm().getHpoTerm().getName());
+			TermId termId = methodConversionResult.getTerm().getHpoTermId();
+			methodResult.setHpoTermId(termId.getIdWithPrefix());
+			methodResult.setHpoTermName(hpoService.getTermForTermId(termId).getName());
 			methodResult.setNegated(methodConversionResult.getTerm().isNegated());
 		} else {
 			methodResult.setExceptionType(getOrCreateExceptionType(methodConversionResult.getException()));
