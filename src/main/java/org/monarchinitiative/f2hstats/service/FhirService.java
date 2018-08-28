@@ -1,15 +1,10 @@
 package org.monarchinitiative.f2hstats.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.monarchinitiative.f2hstats.domain.MethodResult;
-import org.monarchinitiative.f2hstats.domain.ObservationLoinc;
 import org.monarchinitiative.f2hstats.domain.StatsRun;
 import org.monarchinitiative.f2hstats.domain.StatsRunObservation;
 import org.monarchinitiative.f2hstats.domain.StatsRunPatient;
@@ -17,17 +12,13 @@ import org.monarchinitiative.f2hstats.domain.list.ExceptionType;
 import org.monarchinitiative.f2hstats.domain.list.Loinc;
 import org.monarchinitiative.f2hstats.domain.list.MethodType;
 import org.monarchinitiative.f2hstats.repository.MethodResultRepository;
-import org.monarchinitiative.f2hstats.repository.ObservationLoincRepository;
 import org.monarchinitiative.f2hstats.repository.StatsRunObservationRepository;
 import org.monarchinitiative.f2hstats.repository.StatsRunPatientRepository;
 import org.monarchinitiative.f2hstats.repository.list.ExceptionTypeRepository;
 import org.monarchinitiative.f2hstats.repository.list.LoincRepository;
 import org.monarchinitiative.f2hstats.repository.list.MethodTypeRepository;
-import org.monarchinitiative.fhir2hpo.fhir.util.ObservationUtil;
-import org.monarchinitiative.fhir2hpo.hpo.HpoConversionResult;
+import org.monarchinitiative.fhir2hpo.hpo.LoincConversionResult;
 import org.monarchinitiative.fhir2hpo.hpo.MethodConversionResult;
-import org.monarchinitiative.fhir2hpo.loinc.LoincId;
-import org.monarchinitiative.fhir2hpo.loinc.exception.LoincException;
 import org.monarchinitiative.fhir2hpo.service.HpoService;
 import org.monarchinitiative.fhir2hpo.service.ObservationAnalysisService;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -64,9 +55,6 @@ public abstract class FhirService {
 	@Autowired
 	protected LoincRepository loincRepository;
 	
-	@Autowired
-	protected ObservationLoincRepository observationLoincRepository;
-
 	@Autowired
 	protected ObservationAnalysisService observationAnalysisService;
 	
@@ -120,73 +108,24 @@ public abstract class FhirService {
 	}
 
 	/**
-	 * Create a StatsRunObservation for each direct Loinc and save it to the repo. Also save all Loinc information
-	 * related to the observation.
+	 * Create a StatsRunObservation and save it to the repo. 
+	 * 
 	 * @param patient the StatsRunPatient from the repo
 	 * @param observation the FHIR observation
+	 * @param conversionResult the conversion result for a specific LOINC
 	 * @return the saved StatsRunObservations
 	 */
-	protected List<StatsRunObservation> createStatsRunObservations(StatsRunPatient patient, Observation fhirObservation) {
+	protected StatsRunObservation createStatsRunObservation(StatsRunPatient patient, Observation observation, 
+		LoincConversionResult conversionResult) {
 		
-		Set<LoincId> directLoincIds;
-		
-		try {
-			directLoincIds = ObservationUtil.getLoincIdsOfObservation(fhirObservation);
-		} catch (LoincException e) {
-			// No Loincs. Still create the observation so we can understand how often this happens.
-			StatsRunObservation statsRunObservation = new StatsRunObservation();
-			statsRunObservation.setPatient(patient);
-			statsRunObservation.setFhirId(fhirObservation.getIdElement().getIdPart());
-			statsRunObservation.setJson(getParser().encodeResourceToString(fhirObservation));
-			statsRunObservation = statsRunObservationRepository.save(statsRunObservation);
-			return Arrays.asList(statsRunObservation);
-		}
-		
-		List<StatsRunObservation> observations = new ArrayList<>();
-		for (LoincId directLoincId : directLoincIds) {
-			Loinc loinc = getOrCreateLoinc(directLoincId.getCode());
-			StatsRunObservation statsRunObservation = new StatsRunObservation();
-			statsRunObservation.setLoinc(loinc);
-			statsRunObservation.setPatient(patient);
-			statsRunObservation.setFhirId(fhirObservation.getIdElement().getIdPart());
-			statsRunObservation.setJson(getParser().encodeResourceToString(fhirObservation));
-			statsRunObservation = statsRunObservationRepository.save(statsRunObservation);
-			// Parse all the Loinc info and save
-			parseLoincInfo(fhirObservation, statsRunObservation);
-			observations.add(statsRunObservation);
-		}
-		
-		return observations;
-	}
-
-	/**
-	 * Parse information about LOINC codes from the FHIR observation and save it to the repo.
-	 * @param fhirObservation the FHIR observation
-	 * @param runObservation the runObservation in the repo
-	 */
-	protected void parseLoincInfo(Observation fhirObservation, StatsRunObservation runObservation) {
-		try {
-			Set<LoincId> directLoincIds = ObservationUtil.getLoincIdsOfObservation(fhirObservation);
-			for (LoincId directLoincId : directLoincIds) {
-				Loinc loinc = getOrCreateLoinc(directLoincId.getCode());
-				ObservationLoinc observationLoinc = new ObservationLoinc();
-				observationLoinc.setObservation(runObservation);
-				observationLoinc.setLoinc(loinc);
-				observationLoinc.setDirect(true);
-				observationLoincRepository.save(observationLoinc);
-			}
-			Set<LoincId> indirectLoincs = ObservationUtil.getComponentLoincIdsOfObservation(fhirObservation);
-			for (LoincId indirectLoinc : indirectLoincs) {
-				Loinc loinc = getOrCreateLoinc(indirectLoinc.getCode());
-				ObservationLoinc observationLoinc = new ObservationLoinc();
-				observationLoinc.setObservation(runObservation);
-				observationLoinc.setLoinc(loinc);
-				observationLoinc.setDirect(false);
-				observationLoincRepository.save(observationLoinc);				
-			}
-		} catch (LoincException e) {
-			// Do nothing
-		}
+		StatsRunObservation statsRunObservation = new StatsRunObservation();
+		Loinc loinc = getOrCreateLoinc(conversionResult.getLoincId().getCode());
+		statsRunObservation.setLoinc(loinc);
+		statsRunObservation.setPatient(patient);
+		statsRunObservation.setFhirId(conversionResult.getObservationLoincInfo().getFhirId());
+		statsRunObservation.setJson(getParser().encodeResourceToString(observation));
+		statsRunObservation = statsRunObservationRepository.save(statsRunObservation);
+		return statsRunObservation;
 	}
 
 	protected void createMethodResult(StatsRunObservation runObservation,
@@ -256,23 +195,10 @@ public abstract class FhirService {
 	 * @param fhirObservation
 	 */
 	protected void processObservation(StatsRunPatient runPatient, Observation fhirObservation) {
-		List<StatsRunObservation> runObservations = createStatsRunObservations(runPatient, fhirObservation);
-		List<HpoConversionResult> results = observationAnalysisService.analyzeObservation(fhirObservation);
-		for (HpoConversionResult result : results) {
-			StatsRunObservation runObservation;
-			List<StatsRunObservation> matchingLoinc = runObservations.stream().filter(o -> {
-				if (result.getLoincId() != null) {
-					return o.getLoinc().getCode().equals(result.getLoincId().getCode());
-				} else {
-					// No Loinc - a single StatsRunObservation should exist
-					return true;
-				}
-			}).collect(Collectors.toList());
-			
-			// Flawed logic if assertion is not true
-			assert matchingLoinc.size() == 1;
-			runObservation = matchingLoinc.get(0);
-			
+		List<LoincConversionResult> results = observationAnalysisService.analyzeObservation(fhirObservation).getLoincConversionResults();
+		for (LoincConversionResult result : results) {
+			StatsRunObservation runObservation = createStatsRunObservation(runPatient, fhirObservation, result);
+
 			if (result.hasException()) {
 				ExceptionType exceptionType = getOrCreateExceptionType(result.getException());
 				runObservation.setExceptionType(exceptionType);
