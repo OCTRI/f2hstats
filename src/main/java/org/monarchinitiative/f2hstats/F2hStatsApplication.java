@@ -17,10 +17,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootApplication
-@ContextConfiguration(classes = ApplicationConfig.class)
 @EntityScan(basePackages = { "org.monarchinitiative.f2hstats", "org.monarchinitiative.fhir2hpo" })
 @EnableJpaRepositories(basePackages = { "org.monarchinitiative.f2hstats" })
 public class F2hStatsApplication implements CommandLineRunner {

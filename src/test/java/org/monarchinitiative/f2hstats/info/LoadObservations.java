@@ -1,4 +1,4 @@
-package org.monarchinitiative.f2hstats;
+package org.monarchinitiative.f2hstats.info;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.monarchinitiative.f2hstats.ApplicationConfig;
 import org.monarchinitiative.f2hstats.domain.StatsRunObservation;
 import org.monarchinitiative.f2hstats.repository.StatsRunObservationRepository;
 import org.monarchinitiative.f2hstats.service.Stu3Service;
@@ -45,7 +47,11 @@ public class LoadObservations {
 	 * Summarize the valueString observations in the database. Prints a pipe-delimited
 	 * list of the normalized string, the count of encounters, and the servers the string
 	 * was found on.
+	 * 
+	 * Test annotation is ignored because this is for informational purposes only and not required 
+	 * to pass for running the application.
 	 */
+	@Ignore
 	@Test
 	public void testGetObservationsWithValueStrings() {
 
