@@ -31,6 +31,7 @@ public class F2hStatsApplication implements CommandLineRunner {
 	private static final String SANDBOX_HAPI2 = "HAPI2";
 	private static final String SANDBOX_EPIC = "EPIC";
 	private static final String SANDBOX_MITRE = "MITRE";
+	private static final String SANDBOX_HSPC = "HSPC";
 
 	@Autowired
 	StatsRunRepository statsRunRepository;
@@ -73,7 +74,7 @@ public class F2hStatsApplication implements CommandLineRunner {
 	}
 
 	private static List<String> getSandboxOptions() {
-		return Arrays.asList(SANDBOX_R3, SANDBOX_R2, SANDBOX_HAPI3, SANDBOX_HAPI2, SANDBOX_EPIC, SANDBOX_MITRE);
+		return Arrays.asList(SANDBOX_R3, SANDBOX_R2, SANDBOX_HAPI3, SANDBOX_HAPI2, SANDBOX_EPIC, SANDBOX_MITRE, SANDBOX_HSPC);
 	}
 
 	private void runSandbox(int maxPages, String sandbox) throws FHIRException {
@@ -117,6 +118,11 @@ public class F2hStatsApplication implements CommandLineRunner {
 				run = createStatsRun(sandbox, stu3Service);
 				stu3Service.allPatientApiRun(maxPages, run);
 				break;
+			case SANDBOX_HSPC:
+				stu3Service.setUrl("https://api-stu3.hspconsortium.org/STU301withSynthea/open");
+				run = createStatsRun(sandbox, stu3Service);
+				stu3Service.allPatientApiRun(maxPages, run);
+				break;				
 			default:
 				break;
 		}
