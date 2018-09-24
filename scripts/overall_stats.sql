@@ -11,15 +11,14 @@ GROUP BY mr.hpo_term_name, mr.negated
 ORDER BY count(mr.id) DESC;
 
 /* Summary of Loinc Ids encountered */
-SELECT l.code AS 'Code', count(DISTINCT ol.id) AS 'Count', group_concat(DISTINCT ol.direct separator ';') AS 'Direct', 
- group_concat(DISTINCT sr.server) AS 'Servers' 
-FROM `observation_loinc` ol
-	INNER JOIN loinc l ON l.id = ol.`loinc`
-	INNER JOIN stats_run_observation sro ON sro.id = ol.observation
+SELECT l.code AS 'Code', count(DISTINCT sro.id) AS 'Count', 
+ group_concat(DISTINCT sr.server) AS 'Servers' FROM
+	loinc l
+	INNER JOIN stats_run_observation sro ON sro.loinc = l.id
 	INNER JOIN stats_run_patient srp ON srp.id = sro.patient
 	INNER JOIN stats_run sr ON srp.`stats_run` = sr.id
-GROUP BY ol.loinc, l.code
-ORDER BY count(DISTINCT ol.id) DESC, code;
+GROUP BY l.id, l.code
+ORDER BY count(DISTINCT sro.id) DESC, code;
 
 /* Summary of Successes by Method */
 SELECT group_concat(DISTINCT sr.server) AS 'Servers', count(r.id) AS 'Count', m.description AS 'Method' 
