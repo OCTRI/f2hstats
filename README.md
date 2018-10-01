@@ -14,7 +14,7 @@ This will create an empty database called f2hstats with usernames/passwords conf
 
 To run the application, you can provide a couple of optional arguments.
 
-`-s R3` : The name of the sandbox to gather stats for. Current options are R2, R3, EPIC, HAPI, and MITRE. See the main class for more info.
+`-s R3` : The name of the sandbox to gather stats for. Current options are R2, R3, EPIC, HAPI, MITRE, and HSPC. See the main class for more info.
 `-p 5` : The number of pages of patients to collect. Without this option, the app will get as many patients as it can, but for testing you may want to limit the run time.
 
 The application uses Hibernate, and it is currently set to automatically create the database schema on your first run of the application. Data from the run will be persisted to the Docker MySQL container and will remain there even when you bring the container up and down.
