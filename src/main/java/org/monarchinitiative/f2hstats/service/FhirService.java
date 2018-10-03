@@ -122,7 +122,7 @@ public abstract class FhirService {
 		Loinc loinc = getOrCreateLoinc(conversionResult.getLoincId().getCode());
 		statsRunObservation.setLoinc(loinc);
 		statsRunObservation.setPatient(patient);
-		statsRunObservation.setFhirId(conversionResult.getObservationLoincInfo().getFhirId());
+		statsRunObservation.setFhirId(observation.getIdElement().getIdPart());
 		statsRunObservation.setJson(getParser().encodeResourceToString(observation));
 		statsRunObservation = statsRunObservationRepository.save(statsRunObservation);
 		return statsRunObservation;
