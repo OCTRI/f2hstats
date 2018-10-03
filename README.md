@@ -35,6 +35,7 @@ See the [section](#connect-to-mysql) below for more information about connecting
 To run the application, you can provide a couple of optional arguments.
 
 `-s R3` : The name of the sandbox to gather stats for. Current options are R2, R3, EPIC, HAPI2, HAPI3, MITRE, and HSPC. Default to R3 if this option is not provided. See the main class for more info.
+
 `-p 5` : The number of pages of patients to collect. Without this option, the app will get as many patients as it can, but for testing you may want to limit the run time.
 
 The application uses Hibernate, and it is currently set to automatically create the database schema on your first run of the application. Data from the run will be persisted to the Docker MySQL container and will remain there even when you bring the container up and down.
@@ -43,7 +44,7 @@ Running the application will print some information to the console that indicate
 
 ## Connect to MySQL
 
-With the Docker container running, you can connect to MySQL either through the command line or using a free tool such as SequelPro on Mac or MySQLWorkbench in Windows. Use the username and password in the application.properties file of the application (f2hstats). On the command line, you may need to use the host option to connect:
+With the Docker container running, you can connect to MySQL either through the command line or using a free tool such as SequelPro on Mac or MySQLWorkbench in Windows. Use the username and password f2hstats. On the command line, you may need to use the host option to connect:
 
 ```mysql -h 127.0.0.1 -u f2hstats -p f2hstats f2hstats```
 
