@@ -48,5 +48,5 @@ With the Docker container running, you can connect to MySQL either through the c
 
 ```mysql -h 127.0.0.1 -u f2hstats -p f2hstats f2hstats```
 
-The scripts directory in this project provides a few useful queries against the database to gather information about successes and failures. Much of this data is alos summarized in the Excel file in the results folder.
+The scripts directory in this project provides a few useful queries against the database to gather information about successes and failures. Much of this data is also summarized in the Excel file in the results folder.
 
