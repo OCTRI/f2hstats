@@ -22,6 +22,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<fhir2hpo.version>1.0.0</fhir2hpo.version>
+		<hapi.version>3.4.0</hapi.version>
 	</properties>
 
 	<dependencies>
@@ -74,12 +76,12 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client</artifactId>
-			<version>3.4.0</version>
+			<version>${hapi.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.monarchinitiative</groupId>
 			<artifactId>fhir2hpo</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${fhir2hpo.version}</version>
 		</dependency>
 		<!-- Required to work with LogManager in fhir2hpo dependency -->
 		<dependency>
@@ -89,7 +91,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>3.4.0</version>
+			<version>${hapi.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-io</groupId>
@@ -108,11 +110,13 @@
 		<dependency>
 		    <groupId>ca.uhn.hapi.fhir</groupId>
 		    <artifactId>hapi-fhir-converter</artifactId>
-		    <version>3.4.0</version>
+		    <version>${hapi.version}</version>
 		</dependency>
 	</dependencies>
 
 	<build>
+		<!-- Build without version number; only affects JAR file in /target. -->
+		<finalName>${project.artifactId}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
