@@ -30,9 +30,47 @@ Now restore the database:
 
 See the [section](#connect-to-mysql) below for more information about connecting to and querying the database.
 
+## Build Application
+
+Compiling this library requires installation of [Maven](http://maven.apache.org/install.html) and [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
+
+In addition, you need to locally install two libraries that are not yet available on Maven Central. The [monarch-initiative phenol library](https://github.com/monarch-initiative/phenol) defines the domain around the HPO. From the command line:
+
+```
+git clone https://github.com/monarch-initiative/phenol.git
+cd phenol
+git checkout v.1.2.6
+mvn install
+``` 
+
+This checks out and builds Release 1.2.6 of phenol. 
+
+Next install the fhir2hpo library.
+
+```
+git clone https://github.com/OCTRI/fhir2hpo
+cd fhir2hpo
+git checkout v1.0.0
+mvn install
+``` 
+
+This checks out and builds Release 1.0.0 of fhir2hpo. Both libraries are now installed in your local Maven repository.
+
+Finally, clone this library and run `mvn install` to build the jar.
+
 ## Run Application
 
-To run the application, you can provide a couple of optional arguments.
+You can run this application in a few different ways. Make sure MySQL is up and receiving connections. Run as a jar:
+
+```java -jar target/f2hstats.jar```
+
+Or as a spring-boot app:
+
+```mvn spring-boot:run```
+
+You can also set up the Eclipse Spring Tool Suite with all the projects and run using the Boot dashboard. This is best for development as it will track changes in the underlying library so you don't have to rerun maven each time.
+
+When running, you can provide a couple of optional arguments.
 
 `-s R3` : The name of the sandbox to gather stats for. Current options are R2, R3, EPIC, HAPI2, HAPI3, MITRE, and HSPC. Default to R3 if this option is not provided. See the main class for more info.
 
